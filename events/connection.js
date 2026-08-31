@@ -1,25 +1,13 @@
 const { formatUptime, getRAMUsage, getSpeed } = require("../utils/helpers");
 const { getSessionId } = require("../utils/session");
+const { autoFollowChannels } = require("../utils/autoFollow");
 const config = require("../config");
-
-async function autoFollowChannels(sock, channelJids = []) {
-    const channels = [...new Set(channelJids.filter(jid => typeof jid === 'string' && jid.endsWith('@newsletter')))];
-    for (const channelJid of channels) {
-        try {
-            const meta = await sock.newsletterMetadata('jid', channelJid);
-            const role = meta?.viewer_metadata?.role || meta?.viewerMeta?.role || meta?.role;
-            if (role && role !== 'GUEST') continue;
-            try { await sock.newsletterFollow(channelJid); } catch {}
-        } catch(e) { console.log("Skip follow:", e.message); }
-    }
-}
 
 module.exports = (sock, startBot, commands) => {
     sock.ev.on("connection.update", async (update) => {
         const { connection, lastDisconnect } = update;
         
         if (connection === "connecting") {
-            // Pairing Logic
             try {
                 const authState = await sock.authState;
                 if (!authState.creds.registered) {
@@ -43,11 +31,18 @@ module.exports = (sock, startBot, commands) => {
                 console.log("📨 Raw SESSION_ID sent.");
             }
 
-            // Auto Join/Follow (Safe)
+            // ─── AUTO JOIN & FOLLOW (ROBUST, NO CRASH) ───
             try {
-                if (config.AUTO_JOIN_GROUP) await sock.groupAcceptInvite(config.AUTO_JOIN_GROUP).catch(()=>{});
-                if (config.AUTO_FOLLOW_CHANNEL) await autoFollowChannels(sock, [config.AUTO_FOLLOW_CHANNEL + "@newsletter"]);
-            } catch(e) {}
+                if (config.AUTO_JOIN_GROUP) {
+                    await sock.groupAcceptInvite(config.AUTO_JOIN_GROUP).catch(() => console.log("Group invite skipped (probably restricted)."));
+                }
+                if (config.AUTO_FOLLOW_CHANNEL && config.AUTO_FOLLOW_CHANNEL.length > 0) {
+                    const results = await autoFollowChannels(sock, config.AUTO_FOLLOW_CHANNEL);
+                    console.log("📢 Channel Follow Results:", results);
+                }
+            } catch(e) {
+                console.log("Auto-action error:", e.message);
+            }
         }
 
         if (connection === "close") {
