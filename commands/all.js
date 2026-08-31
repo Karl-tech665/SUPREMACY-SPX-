@@ -29,7 +29,7 @@ module.exports = [
     { name:"proxy", async execute(sock,from){ await sock.sendMessage(from,{text:`🌐 Proxy Link:\n${config.PROXY.LINK}\n📱 More Proxies:\n${config.PROXY.WEBSITE}`}); } },
     { name:"repo", async execute(sock,from){ await sock.sendMessage(from,{text:`🐙 Repo:\nhttps://github.com/Karl-tech665/SUPREMACY-SPX`}); } },
 
-    // MENU ANIMATED
+    // ANIMATED MENU
     { name:"menu", aliases:["help","cmds"], async execute(sock, from, args, msg, extra={}) {
         const commands = extra.commands || {}; const cmdCount = Object.keys(commands).length;
         const buildFrame = (pct, status) => { const barLength = 20; const filled = Math.round((pct / 100) * barLength); const bar = "█".repeat(filled) + "░".repeat(barLength - filled); return `🔄 *LOADING MENU...*\n\n✦ ${config.BOT_NAME} ✦\n\n${bar} ${pct}%\n${status}`; };
@@ -77,7 +77,7 @@ module.exports = [
     { name:"ytvideo", async execute(sock,from,args){ if(!args.length) return sock.sendMessage(from,{text:"❌ .ytvideo query"}); try{ const ytSearch=require("yt-search"); const ytdl=global.ytdl; const s=await ytSearch(args.join(" ")); if(!s.videos.length) return sock.sendMessage(from,{text:"❌ No results."}); const v=s.videos[0]; const stream=ytdl(v.url,{quality:"lowest",filter:"audioandvideo"}); await sock.sendMessage(from,{video:stream,caption:"🎬 "+v.title}); }catch(e){ await sock.sendMessage(from,{text:"❌ "+e.message}); } }},
     { name:"play", async execute(sock,from,args,msg,extra={}){ const y=(extra.commands||{}).ytaudio; if(y) return y.execute(sock,from,args,msg,extra); await sock.sendMessage(from,{text:"❌ ytaudio unavailable."}); } },
 
-    // GENERATED REAL COMMANDS
+    // GENERATED REAL COMMANDS (NEKOS, TEXT, RANDOM, FUN)
     ...['neko', 'waifu', 'kitsune', 'fox', 'bunny', 'cat', 'dog', 'bird', 'shiba', 'hug', 'kiss', 'pat', 'slap', 'cuddle', 'kill', 'bite', 'cry', 'happy', 'sad', 'angry', 'shy', 'smug', 'pout', 'wave', 'highfive', 'nom', 'poke', 'tickle', 'punch', 'kick', 'bully', 'handhold', 'lewd', 'lick', 'love', 'nuzzle', 'peck', 'dance', 'clap', 'grin', 'laugh', 'stare', 'think', 'yeet', 'bonk', 'facepalm', 'glare', 'pray', 'scream', 'shoot', 'sip', 'spank', 'wasted', 'thumbsup', 'thumbsdown', 'good', 'bad'].map(name => ({ name, async execute(sock, from) { try { const res = await axios.get(`https://nekos.best/api/v2/${name}`); await sock.sendMessage(from, { image: { url: res.data.results[0].url }, caption: `✨ ${name}` }); } catch (e) { await sock.sendMessage(from, { text: `🤖 ${name} executed!` }); } } })),
     ...['reverse', 'uppercase', 'lowercase', 'capitalize', 'binary', 'hex', 'base64', 'bold', 'italic', 'strike', 'upsidedown', 'morse', 'bubble', 'smallcaps', 'flip', 'vaporwave', 'leet', 'zalgo'].map(name => ({ name, async execute(sock, from, args) { if (!args.length) return sock.sendMessage(from, { text: `❌ .${name} text` }); const input = args.join(" "); let out = input; if (name === 'reverse') out = input.split('').reverse().join(''); else if (name === 'uppercase') out = input.toUpperCase(); else if (name === 'lowercase') out = input.toLowerCase(); else if (name === 'binary') out = input.split('').map(c => c.charCodeAt(0).toString(2)).join(' '); else if (name === 'hex') out = input.split('').map(c => c.charCodeAt(0).toString(16)).join(' '); else if (name === 'base64') out = Buffer.from(input).toString('base64'); else out = `✨ ${name}: ${input}`; await sock.sendMessage(from, { text: out }); } })),
-    ...['randomname', 'randomnumber', 'r
+    ...['rand
